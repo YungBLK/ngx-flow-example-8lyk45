@@ -1,0 +1,87 @@
+<h2>Advanced example</h2>
+
+<p>This should allow only images to upload.</p>
+
+<p>
+  Is flowjs supported by the browser? {{ flow.flowJs?.support ? 'yes' : 'no' }}
+</p>
+
+<div><input type="checkbox" [(ngModel)]="autoupload" /> Autoupload</div>
+
+<ng-container
+  #flowAdvanced="flow"
+  [flowConfig]="{ target: '/' }"
+></ng-container>
+
+
+<div class="drop" flowDrop [flow]="flowAdvanced.flowJs">
+  <div class="primary-text">
+    Drag and Drop your files into this area to upload
+  </div>
+  <div class="secondary-text">Each file should be less than 1GB</div>
+  <div class="buttons">
+    <button
+      title="Upload File"
+      class="btn btn-sm btn-default"
+      flowButton
+      [flow]="flowAdvanced.flowJs"
+      [flowAttributes]="{ accept: 'image/*' }"
+    >
+      Upload File
+    </button>
+  </div>
+</div>
+
+<div class="transfers">
+  <div
+    class="transfer"
+    [ngClass]="{
+      'transfer--error': transfer.error,
+      'transfer--success': transfer.success
+    }"
+    *ngFor="
+      let transfer of (flowAdvanced.transfers$ | async).transfers;
+      trackBy: trackTransfer
+    "
+  >
+    <div class="name">name: {{ transfer.name }}</div>
+    <div>progress: {{ transfer.progress | percent }}</div>
+    <div>size: {{ transfer.size | number: '1.0' }} bytes</div>
+    <div>
+      current speed: {{ transfer.currentSpeed | number: '1.0' }} bytes/s
+    </div>
+    <div>
+      average speed: {{ transfer.averageSpeed | number: '1.0' }} bytes/s
+    </div>
+    <div>time ramining: {{ transfer.timeRemaining }}s</div>
+    <div>paused: {{ transfer.paused }}</div>
+    <div>success: {{ transfer.success }}</div>
+    <div>complete: {{ transfer.complete }}</div>
+    <div>error: {{ transfer.error }}</div>
+
+    <div>
+      <img [flowSrc]="transfer" />
+    </div>
+
+    <div>
+      <button (click)="flowAdvanced.pauseFile(transfer)">pause</button>
+      <button (click)="flowAdvanced.resumeFile(transfer)">resume</button>
+      <button (click)="flowAdvanced.cancelFile(transfer)">cancel</button>
+    </div>
+  </div>
+</div>
+<button
+  type="button"
+  (click)="flowAdvanced.upload()"
+  [disabled]="!(flow.somethingToUpload$ | async)"
+>
+  Start upload
+</button>
+<button
+  type="button"
+  (click)="flowAdvanced.cancel()"
+  [disabled]="!(flowAdvanced.transfers$ | async).transfers.length"
+>
+  Cancel all
+</button>
+Total progress: {{ (flowAdvanced.transfers$ | async).totalProgress | percent }}
